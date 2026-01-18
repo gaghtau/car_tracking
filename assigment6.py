@@ -21,14 +21,11 @@ while True:
 
     height, width = frame.shape[:2]
 
-    # ROI: нижние 3/4 кадра (исключаем небо)
     roi = frame[height // 4:, :]
 
-    # Фоновое вычитание
     fg_mask = bg_subtractor.apply(roi)
     _, fg_mask = cv2.threshold(fg_mask, 200, 255, cv2.THRESH_BINARY)
 
-    # Морфология для удаления шума
     fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_OPEN, kernel)
     fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_CLOSE, kernel)
 
@@ -40,7 +37,7 @@ while True:
             continue
 
         x, y, w, h = cv2.boundingRect(cnt)
-        y += height // 4  # компенсируем ROI
+        y += height // 4 
 
         if y + h < height // 3:
             continue
@@ -49,16 +46,15 @@ while True:
         cx, cy = x + w // 2, y + h // 2
         cv2.circle(frame, (cx, cy), 4, (0, 0, 255), -1)
 
-    # Масштабируем, если слишком большое
     max_width = 1200
     scale = min(max_width / frame.shape[1], 1.0)
     display_frame = cv2.resize(frame, (0, 0), fx=scale, fy=scale) if scale < 1.0 else frame
-    display_mask = cv2.resize(fg_mask, (display_frame.shape[1], display_frame.shape[0]))  # масштабируем маску к окну
+    display_mask = cv2.resize(fg_mask, (display_frame.shape[1], display_frame.shape[0]))
 
     cv2.imshow("Cars Detection", display_frame)
-    cv2.imshow("Motion Mask", display_mask)  # Чёрное/белое окно
+    cv2.imshow("Motion Mask", display_mask)  
 
-    if cv2.waitKey(30) & 0xFF == 27:  # ESC
+    if cv2.waitKey(30) & 0xFF == 27:  
         break
 
 cap.release()
